@@ -21,7 +21,7 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.apache.zeppelin.interpreter.Constants;
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.notebook.injector.Injector;
@@ -40,8 +40,7 @@ import org.slf4j.LoggerFactory;
 public class HttpConfigInjector implements Injector {
 
     private final Logger logger = LoggerFactory.getLogger(HttpConfigInjector.class);
-    private final Pattern variablePattern = Pattern.compile("\\{([^\\}]+)\\}");
-    private static final String HTTP_CONFIG_URL = "config.http.url";
+    private static final String HTTP_CONFIG_URL = "inject.http.config.url";
     private static final Gson GSON = new Gson();
 
     @Override
@@ -64,8 +63,8 @@ public class HttpConfigInjector implements Injector {
     }
 
     private String doInject(Map<String, String> configs, String script) {
-        logger.info("begin to inject variables use {} data", configs.size());
-        Matcher matcher = variablePattern.matcher(script);
+        logger.info("begin to inject variables find in {} configs", configs.size());
+        Matcher matcher = Constants.VARIABLE_PATTERN.matcher(script);
         StringBuffer sb = new StringBuffer();
 
         while (matcher.find()) {
@@ -84,7 +83,11 @@ public class HttpConfigInjector implements Injector {
         try {
             String jsonResult = HttpClientUtils.post(httpURL, buildHeaders(), GSON.toJson(buildParams(context)));
             ConfigResponse configResponse = GSON.fromJson(jsonResult, ConfigResponse.class);
-            if (configResponse.data != null) {
+            if (configResponse.code != 0 || configResponse.data == null) {
+                logger.error("Config get result abnormal: {}", jsonResult);
+            }
+
+            if (configResponse.code == 0 && configResponse.data != null) {
                 return configResponse.data;
             }
         } catch (Exception e) {
