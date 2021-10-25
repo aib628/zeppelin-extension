@@ -59,11 +59,23 @@ public class HttpConfigInjector implements Injector {
         }
 
         Map<String, String> configs = getConfigs(httpURL, context);
+
+        injectLocalProperties(context, configs);
+        logger.info("begin to inject variables find in {} configs", configs.size());
         return paragraphInjector.inject(doInject(configs, script));
     }
 
+    private void injectLocalProperties(InterpreterContext context, Map<String, String> configs) {
+        Map<String, String> localProperties = context.getLocalProperties();
+        localProperties.forEach((key, value) -> {
+            String finalValue = doInject(configs, value);
+            if (!finalValue.equals(value)) {
+                localProperties.put(key, finalValue);
+            }
+        });
+    }
+
     private String doInject(Map<String, String> configs, String script) {
-        logger.info("begin to inject variables find in {} configs", configs.size());
         Matcher matcher = Constants.VARIABLE_PATTERN.matcher(script);
         StringBuffer sb = new StringBuffer();
 

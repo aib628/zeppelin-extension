@@ -48,6 +48,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <zeppelin.version>0.9.1-SNAPSHOT</zeppelin.version>
+        <javax.ws.rsapi.version>2.1</javax.ws.rsapi.version>
     </properties>
 
     <dependencies>
@@ -56,6 +57,21 @@
             <groupId>org.apache.zeppelin</groupId>
             <artifactId>zeppelin-zengine</artifactId>
             <version>${zeppelin.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.zeppelin</groupId>
+            <artifactId>zeppelin-server</artifactId>
+            <version>${zeppelin.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>${javax.ws.rsapi.version}</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
