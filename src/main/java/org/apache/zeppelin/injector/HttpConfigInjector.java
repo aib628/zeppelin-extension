@@ -41,6 +41,7 @@ public class HttpConfigInjector implements Injector {
 
     private final Logger logger = LoggerFactory.getLogger(HttpConfigInjector.class);
     private static final String HTTP_CONFIG_URL = "inject.http.config.url";
+    private static final String HTTP_CONFIG_TOKEN = "inject.http.config.token";
     private static final Gson GSON = new Gson();
 
     @Override
@@ -58,7 +59,8 @@ public class HttpConfigInjector implements Injector {
             return script;
         }
 
-        Map<String, String> configs = getConfigs(httpURL, context);
+        String httpToken = interpreter.getProperty(HTTP_CONFIG_TOKEN);
+        Map<String, String> configs = getConfigs(httpURL, httpToken, context);
 
         injectLocalProperties(context, configs);
         logger.info("begin to inject variables find in {} configs", configs.size());
@@ -91,9 +93,9 @@ public class HttpConfigInjector implements Injector {
         return sb.toString();
     }
 
-    private Map<String, String> getConfigs(String httpURL, InterpreterContext context) {
+    private Map<String, String> getConfigs(String httpURL, String httpToken, InterpreterContext context) {
         try {
-            String jsonResult = HttpClientUtils.post(httpURL, buildHeaders(), GSON.toJson(buildParams(context)));
+            String jsonResult = HttpClientUtils.post(httpURL, buildHeaders(httpToken), GSON.toJson(buildParams(context)));
             ConfigResponse configResponse = GSON.fromJson(jsonResult, ConfigResponse.class);
             if (configResponse.code != 0 || configResponse.data == null) {
                 logger.error("Config get result abnormal: {}", jsonResult);
@@ -109,9 +111,13 @@ public class HttpConfigInjector implements Injector {
         return new HashMap<>();
     }
 
-    private Map<String, String> buildHeaders() {
+    private Map<String, String> buildHeaders(String httpToken) {
         Map<String, String> params = new HashMap<>();
         params.put("content-type", "application/json");
+
+        if (httpToken != null) {
+            params.put("Authorization", "Bearer " + httpToken);
+        }
 
         return params;
     }

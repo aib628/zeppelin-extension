@@ -75,6 +75,10 @@ public class HttpClientUtils {
             throw new RuntimeException("Http请求失败[无响应]...");
         }
 
+        if (httpResponse.getStatusLine().getStatusCode() != 200) {
+            throw new RuntimeException("Http请求失败[" + httpResponse.getStatusLine().getStatusCode() + "]...");
+        }
+
         if (httpResponse.getEntity() == null) {
             throw new RuntimeException("Http请求失败[" + httpResponse.getStatusLine().getStatusCode() + "]...");
         }
