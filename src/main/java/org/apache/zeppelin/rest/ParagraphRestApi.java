@@ -118,7 +118,7 @@ public class ParagraphRestApi extends AbstractRestApi {
     }
 
     private Paragraph getParagraph(String noteId, String paragraphId) throws IOException {
-        Note note = notebook.getNote(noteId);
+        Note note = notebook.processNote(noteId, noteToProcess -> noteToProcess);
         checkIfNoteIsNotNull(note, noteId);
         checkIfUserCanRead(noteId);
 
